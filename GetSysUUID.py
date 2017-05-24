@@ -50,9 +50,9 @@ class GetSysUUID(object):
         ##Return the actual UUID or a hash of it
         if self.p_anonymous:
             self.uuid = hashlib.md5(self.uuid).hexdigest()
-            print "MD5 (UUID): %s"%self.uuid
+            print ("MD5 (UUID): %s"%self.uuid)
         else:
-            print "UUID: %s"%self.uuid
+            print ("UUID: %s"%self.uuid)
 
         return self.uuid
     
@@ -124,7 +124,7 @@ class GetSysUUID(object):
         bios_size = get_fw(ctypes.wintypes.DWORD(1381190978), 0, 0, 0)
         
         ##Buffer for BIOS to be written to
-        FirmwareTableBuf = ctypes.create_string_buffer("\000"*bios_size)
+        FirmwareTableBuf = ctypes.create_string_buffer(b"\000"*bios_size)
         
         ##Now actually dump the Raw SMBIOS table
         ret = get_fw(ctypes.wintypes.DWORD(FirmwareTableSig),
@@ -187,8 +187,8 @@ class ParseSMBIOSTable:
         """
         while 1:
             try:
-                formatted_len = struct.unpack("<B", self.SMBIOSTableData[1] )[0]
-            except IndexError:
+                formatted_len = struct.unpack("<B", self.SMBIOSTableData[1:2] )[0]
+            except struct.error:
                 ##Reached the end of the structure
                 break
             
@@ -209,17 +209,17 @@ class ParseSMBIOSTable:
         raw_data        = self.table_data[1]
         self.type1_data = {}
           
-        self.type1_data["Length"]        = struct.unpack("<B",   raw_data[1])[0]
+        self.type1_data["Length"]        = struct.unpack("<B",   raw_data[1:2])[0]
         self.type1_data["Handle"]        = struct.unpack("<H",   raw_data[2:4])[0]
-        self.type1_data["Manufacturer"]  = struct.unpack("<B",   raw_data[5])[0]
-        self.type1_data["Product Name"]  = struct.unpack("<B",   raw_data[6])[0]
-        self.type1_data["Version"]       = struct.unpack("<B",   raw_data[7])[0]
-        self.type1_data["Serial Number"] = struct.unpack("<B",   raw_data[8])[0]
+        self.type1_data["Manufacturer"]  = struct.unpack("<B",   raw_data[5:6])[0]
+        self.type1_data["Product Name"]  = struct.unpack("<B",   raw_data[6:7])[0]
+        self.type1_data["Version"]       = struct.unpack("<B",   raw_data[7:8])[0]
+        self.type1_data["Serial Number"] = struct.unpack("<B",   raw_data[8:9])[0]
         self.type1_data["UUID"]          = struct.unpack("<16B", raw_data[8:24])
-        self.type1_data["Wake-up Type"]  = struct.unpack("<B",   raw_data[25])[0]
+        self.type1_data["Wake-up Type"]  = struct.unpack("<B",   raw_data[25:26])[0]
         try:
-            self.type1_data["SKU Number"]    = struct.unpack("<B",   raw_data[26])[0]
-            self.type1_data["Family"]        = struct.unpack("<B",   raw_data[27])[0]
+            self.type1_data["SKU Number"]    = struct.unpack("<B",   raw_data[26:27])[0]
+            self.type1_data["Family"]        = struct.unpack("<B",   raw_data[27:28])[0]
         except IndexError:
             pass
             
